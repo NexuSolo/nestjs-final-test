@@ -1,18 +1,35 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class UserService {
-    constructor() {}
+    private users: string[] = [];
 
-    addUser(email: string): Promise<void> {
-        throw new NotImplementedException();
+    async addUser(email: string): Promise<void> {
+        if (!this.isValidEmail(email)) {
+            throw new BadRequestException('Invalid email format');
+        }
+        
+        if (this.users.includes(email)) {
+            throw new ConflictException('User already exists');
+        }
+        this.users.push(email);
     }
 
-    getUser(email: string): Promise<unknown> {
-        throw new NotImplementedException();
+    private isValidEmail(email: string): boolean {
+        // Expression régulière pour vérifier le format de l'email
+        const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 
-    resetData(): Promise<void> {
-        throw new NotImplementedException();
+    async getUser(email: string): Promise<string> {
+        const user = this.users.find(u => u === email);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        return user;
+    }
+
+    async resetData(): Promise<void> {
+        this.users = [];
     }
 }

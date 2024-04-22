@@ -1,6 +1,16 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
+import { UserService } from './user.service';
 
 @Controller()
 export class UserController {
-    constructor() {}
+    constructor(private readonly userService: UserService) {}
+
+    @Post()
+    async addUser(@Body('email') email: string): Promise<void> {
+        try {
+            await this.userService.addUser(email);
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
+    }
 }
