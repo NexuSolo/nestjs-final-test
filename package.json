@@ -32,6 +32,7 @@
     "@nestjs/typeorm": "^10.0.2",
     "mongoose": "^8.2.1",
     "pg": "^8.11.3",
+    "postgres": "^3.4.4",
     "postgresql": "^0.0.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",

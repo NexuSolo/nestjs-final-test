@@ -10,7 +10,7 @@ import { User } from './user/user.model';
     imports: [AppRoutingModule, ConfigurationModule, DatabaseModule,
         SequelizeModule.forRoot({
         dialect: 'postgres',
-        host: 'postgres',
+        host: 'localhost',
         port: 5432,
         username: 'postgres',
         password: 'postgres',
