@@ -1,25 +1,37 @@
-import { Injectable, ConflictException, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { User } from './user.model';
+import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
+import { User } from './user.entity';
 
 @Injectable()
 export class UserService {
     constructor(
-        @InjectModel(User)
-        private readonly userModel: typeof User,
+        @Inject('USERS_REPOSITORY')
+        private usersRepository: typeof User,
     ) {}
 
-    async addUser(email: string): Promise<void> {
+    async addUser(email: string): Promise<User> {
         try {
-            await this.userModel.create({ email });
+            const user = await this.getUser(email);
+            if (user) {
+                throw new HttpException('L\'utilisateur existe déjà', 409);
+            }
         } catch (err) {
-            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+            throw err;
+        }
+        try {
+            return await this.usersRepository.create({ email });
+        } catch (err) {
+            throw new HttpException('Email invalide', HttpStatus.BAD_REQUEST);
         }
     }
 
-    async getUser(email: string): Promise<User> {
+    async getUser(email: string): Promise<User | null> {
         try {
-            const user = await this.userModel.findOne({ where: { email } });
+            const user = await this.usersRepository.findOne({ where: { email } });
+            if (!user) {
+                console.log("L'utilisateur: " + email + " n'existe pas");
+                return null;
+            }
+            console.log("L'utilisateur " + user.email + " existe avec l'id: " + user.id);
             return user;
         } catch (err) {
             throw err;
@@ -27,6 +39,19 @@ export class UserService {
     }
 
     async resetData(): Promise<void> {
-        return null;
+        try {
+            await this.usersRepository.destroy({ where: {}, truncate: true });
+            console.log("Tous les utilisateurs ont été supprimés");
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getUserById(id: string): Promise<User | null> {
+        try {
+            return await this.usersRepository.findOne({ where: { id } });
+        } catch (err) {
+            throw err;
+        }
     }
 }
