@@ -14,9 +14,5 @@ export class UserController {
     async getUser(@Param('email') email: string) {
         return await this.userService.getUser(email);
     }
-
-    @Delete()
-    async resetData() {
-        return await this.userService.resetData();
-    }
+    
 }
