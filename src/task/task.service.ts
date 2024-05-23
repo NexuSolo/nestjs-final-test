@@ -1,6 +1,6 @@
 import { HttpException, Inject, Injectable, NotImplementedException } from '@nestjs/common';
 import { Task } from './task.entity';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class TaskService {
@@ -9,13 +9,19 @@ export class TaskService {
         private tasksRepository: typeof Task,
         private userService: UserService) {}
 
-    async addTask(name: string, userId: string, priority: number): Promise<void> {
+    async addTask(name: string, userId: number, priority: number): Promise<Task> {
         try {
+            if(isNaN(userId) || isNaN(priority)) {
+                throw new HttpException('userId ou priority invalide', 400);
+            }
             const user = await this.userService.getUserById(userId);
-            if(!user || priority < 0 || name === "" || name === null){
+            if(!user || priority < 0 || name === "" || name === null ) {
                 throw new HttpException('tache invalide', 400);
             }
-            await this.tasksRepository.create({ name, userId, priority });
+            console.log("name", name);
+            console.log("userId", userId);
+            console.log("priority", priority);
+            return await this.tasksRepository.create({ name, userId, priority });
         } catch (error) {
             throw new HttpException('Erreur', 400);
         }
@@ -29,12 +35,15 @@ export class TaskService {
         }
     }
 
-    async getUserTasks(userId: string): Promise<unknown[]> {
-        const user = await this.userService.getUserById(userId);
-        if(!user){
-            throw new HttpException('userId est invalide', 400);
-        }
+    async getUserTasks(userId: number): Promise<unknown[]> {
         try {
+            if(isNaN(userId)) {
+                throw new HttpException('userId est invalide', 400);
+            }
+            const user = await this.userService.getUserById(userId);
+            if(!user){
+                throw new HttpException('userId est invalide', 400);
+            }
             return await this.tasksRepository.findAll({ where: { userId } });
         } catch (error) {
             throw new HttpException('Erreur', 400);

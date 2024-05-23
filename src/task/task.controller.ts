@@ -6,12 +6,12 @@ export class TaskController {
     constructor(private readonly taskService: TaskService) {}
 
     @Post()
-    async addTask(@Body('name') name: string, @Body('userId') userId: string, @Body('priority') priority: number){
+    async addTask(@Body('name') name: string, @Body('userId') userId: number, @Body('priority') priority: number){
         return await this.taskService.addTask(name, userId, priority);
     }
 
     @Get('/user/:userId')
-    async getUserTasks(@Param('userId') userId: string){
+    async getUserTasks(@Param('userId') userId: number){
         return await this.taskService.getUserTasks(userId);
     }
 

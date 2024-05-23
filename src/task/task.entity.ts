@@ -4,7 +4,7 @@ import { AllowNull, Column, Model, Table } from 'sequelize-typescript';
 export class Task extends Model {
     @AllowNull(false)
     @Column
-    userId: string;
+    userId: number;
 
     @AllowNull(false)
     @Column
