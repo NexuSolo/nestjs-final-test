@@ -35,7 +35,7 @@ export class TaskService {
         }
     }
 
-    async getUserTasks(userId: number): Promise<unknown[]> {
+    async getUserTasks(userId: number): Promise<Task[]> {
         try {
             if(isNaN(userId)) {
                 throw new HttpException('userId est invalide', 400);
@@ -44,9 +44,13 @@ export class TaskService {
             if(!user){
                 throw new HttpException('userId est invalide', 400);
             }
-            return await this.tasksRepository.findAll({ where: { userId } });
+            console.log("tasks en cours, userId", userId);
+            const tasks = await this.tasksRepository.findAll({ where: { userId : Number } });
+            console.log("tasks", tasks);
+            return tasks;
         } catch (error) {
-            throw new HttpException('Erreur', 400);
+            console.log("error", error);
+            throw error;
         }
     }
 
