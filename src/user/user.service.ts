@@ -1,12 +1,13 @@
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { User } from './user.entity';
+import { ValidationError } from 'sequelize';
 
 @Injectable()
 export class UserService {
     constructor(
         @Inject('USERS_REPOSITORY')
         private usersRepository: typeof User,
-    ) {}
+    ) { }
 
     async addUser(email: string): Promise<User> {
         try {
@@ -14,13 +15,12 @@ export class UserService {
             if (user) {
                 throw new HttpException('L\'utilisateur existe déjà', 409);
             }
-        } catch (err) {
-            throw err;
-        }
-        try {
             return await this.usersRepository.create({ email });
         } catch (err) {
-            throw new HttpException('Email invalide', HttpStatus.BAD_REQUEST);
+            if (err instanceof ValidationError) {
+                throw new HttpException('Email invalide', HttpStatus.BAD_REQUEST);
+            }
+            throw err;
         }
     }
 
@@ -28,10 +28,8 @@ export class UserService {
         try {
             const user = await this.usersRepository.findOne({ where: { email } });
             if (!user) {
-                console.log("L'utilisateur: " + email + " n'existe pas");
                 return null;
             }
-            console.log("L'utilisateur " + user.email + " existe avec l'id: " + user.id);
             return user;
         } catch (err) {
             throw err;
@@ -41,7 +39,6 @@ export class UserService {
     async resetData(): Promise<void> {
         try {
             await this.usersRepository.destroy({ where: {}, truncate: true });
-            console.log("Tous les utilisateurs ont été supprimés");
         } catch (err) {
             throw err;
         }

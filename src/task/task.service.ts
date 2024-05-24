@@ -15,12 +15,9 @@ export class TaskService {
                 throw new HttpException('userId ou priority invalide', 400);
             }
             const user = await this.userService.getUserById(userId);
-            if(!user || priority < 0 || name === "" || name === null ) {
+            if(!user || priority < 0 || name === null || name === "" ) {
                 throw new HttpException('tache invalide', 400);
             }
-            console.log("name", name);
-            console.log("userId", userId);
-            console.log("priority", priority);
             return await this.tasksRepository.create({ name, userId, priority });
         } catch (error) {
             throw new HttpException('Erreur', 400);
@@ -44,12 +41,8 @@ export class TaskService {
             if(!user){
                 throw new HttpException('userId est invalide', 400);
             }
-            console.log("tasks en cours, userId", userId);
-            const tasks = await this.tasksRepository.findAll({ where: { userId : Number } });
-            console.log("tasks", tasks);
-            return tasks;
+            return await this.tasksRepository.findAll({ where: { userId : Number } });
         } catch (error) {
-            console.log("error", error);
             throw error;
         }
     }
@@ -57,7 +50,6 @@ export class TaskService {
     async resetData(): Promise<void> {
         try {
             await this.tasksRepository.destroy({ where: {}, truncate: true });
-            console.log("Toutes les tâches ont été supprimées");
         } catch (error) {
             throw new HttpException('Erreur', 400);
         }
